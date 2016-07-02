@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-double xL = 0., xR = 1., hx, t, Tmax=0.034, CFL = 0.9, dt, a = -1.;
+double xL = 0., xR = 1., hx, t, Tmax=0.095, CFL = 0.9, dt, a = -1.;
 #define Nx 64
 
 double 	Uarr[Nx];
@@ -10,7 +10,7 @@ double 	Uarr[Nx];
 void CIP()
 {
 
-    
+
     dt = CFL*hx/fabs(a);
 
 
@@ -39,38 +39,67 @@ void CIP()
     }
 
 
-    printf("%f\n", dt);
     FILE *op;
-
     int ts;
-    for( t = 0.; t < Tmax; t+=dt )
+    if(a>0.)
     {
-        for (i = 0; i < Nx-1; i++)
+        for( t = 0.; t < Tmax; t+=dt )
         {
-            A = -2.*(Uarr[i+1]-Uarr[i])/hx/hx/hx + (dUarr[i+1]+dUarr[i])/hx/hx;
-            B = 3.*(Uarr[i+1]-Uarr[i])/hx/hx - (2.*dUarr[i]+dUarr[i+1])/hx;
-            C = dUarr[i];
-            D = Uarr[i];
+            for (i = 1; i < Nx; i++)
+            {
+                A = 2.*(Uarr[i-1]-Uarr[i])/hx/hx/hx + (dUarr[i-1]+dUarr[i])/hx/hx;
+                B = 3.*(Uarr[i-1]-Uarr[i])/hx/hx + (2.*dUarr[i]+dUarr[i-1])/hx;
+                C = dUarr[i];
+                D = Uarr[i];
 
-            ksi =  -a*dt;
+                ksi =  -a*dt;
 
-            UarrN[i]  = ((A*ksi + B)*ksi+C)*ksi+D;
-            dUarrN[i] = ((3.*A*ksi + 2.*B)*ksi+C);
+                UarrN[i]  = ((A*ksi + B)*ksi+C)*ksi+D;
+                dUarrN[i] = ((3.*A*ksi + 2.*B)*ksi+C);
+            }
 
-            //UarrN[i] = Uarr[i] - CFL*(Uarr[i] - Uarr[i-1]);
+            UarrN[0] = UarrN[Nx-1];
+            dUarrN[0] = dUarrN[Nx-1];
+            for (i = 0; i < Nx; i++)
+            {
+                Uarr[i]  = UarrN[i];
+                dUarr[i] = dUarrN[i];
+            }
+            ts++;
         }
-
-        UarrN[Nx-1] = UarrN[0];
-        dUarrN[Nx-1] = dUarrN[0];
-        for (i = 0; i < Nx; i++)
-        {
-            Uarr[i]  = UarrN[i];
-            dUarr[i] = dUarrN[i];
-            //fprintf (op, "%f %f %f\n", (double)i*hx + xL, t, Uarr[i]);
-        }
-        ts++;
     }
-    //fclose(op);
+    
+    
+    if(a<0.)
+    {
+        for( t = 0.; t < Tmax; t+=dt )
+        {
+            for (i = 0; i < Nx-1; i++)
+            {
+                A = -2.*(Uarr[i+1]-Uarr[i])/hx/hx/hx + (dUarr[i+1]+dUarr[i])/hx/hx;
+                B = 3.*(Uarr[i+1]-Uarr[i])/hx/hx - (2.*dUarr[i]+dUarr[i+1])/hx;
+                C = dUarr[i];
+                D = Uarr[i];
+
+                ksi =  -a*dt;
+
+                UarrN[i]  = ((A*ksi + B)*ksi+C)*ksi+D;
+                dUarrN[i] = ((3.*A*ksi + 2.*B)*ksi+C);
+
+                //UarrN[i] = Uarr[i] - CFL*(Uarr[i] - Uarr[i-1]);
+            }
+
+            UarrN[Nx-1] = UarrN[0];
+            dUarrN[Nx-1] = dUarrN[0];
+            for (i = 0; i < Nx; i++)
+            {
+                Uarr[i]  = UarrN[i];
+                dUarr[i] = dUarrN[i];
+                //fprintf (op, "%f %f %f\n", (double)i*hx + xL, t, Uarr[i]);
+            }
+            ts++;
+        }
+    }
     printf("%d\n",ts);
 
     op = fopen("output.CIP","w");
@@ -93,22 +122,43 @@ void upwind()
 
     FILE *op;
     op = fopen("output.upwind", "w");
-    for(t=0.; t<Tmax; t+=dt)
+    if(a<0.)
     {
-        for(i = 0; i < Nx-1; i++)
+        for(t=0.; t<Tmax; t+=dt)
         {
-            UarrN[i] = Uarr[i] - CFL*(Uarr[i+1] - Uarr[i]);
+            for(i = 0; i < Nx-1; i++)
+            {
+                UarrN[i] = Uarr[i] + CFL*(Uarr[i+1] - Uarr[i]);
+            }
+
+            UarrN[Nx-1] = UarrN[0];
+
+            for(i = 0; i < Nx; i++)
+            {
+                Uarr[i] = UarrN[i];
+            }
+            nt++;
         }
-
-        UarrN[Nx-1] = UarrN[0];
-
-        for(i = 0; i < Nx; i++)
-        {
-            Uarr[i] = UarrN[i];
-        }
-
-        nt++;
     }
+    if(a>0)
+    {
+        for(t=0.; t<Tmax; t+=dt)
+        {
+            for(i = 1; i < Nx; i++)
+            {
+                UarrN[i] = Uarr[i] - CFL*(Uarr[i] - Uarr[i-1]);
+            }
+
+            UarrN[0] = UarrN[Nx-1];
+
+            for(i = 0; i < Nx; i++)
+            {
+                Uarr[i] = UarrN[i];
+            }
+            nt++;
+        }
+    }
+
     for(i = 0; i < Nx; i++)
     {
         fprintf(op,"%f %f\n",(double)i*hx,Uarr[i]);
