@@ -2,17 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 
-double xL = 0., xR = 1., hx, t, Tmax=0.095, CFL = 0.9, dt, a = -1.;
+double xL = 0., xR = 1., hx, t, Tmax=0.195, CFL = 0.9, dt, a = 1.;
 #define Nx 64
 
 double 	Uarr[Nx];
 
 void CIP()
 {
-
-
     dt = CFL*hx/fabs(a);
-
 
     int i;
     double	UarrN[Nx],
@@ -20,28 +17,20 @@ void CIP()
 
     double A, B, C, D, ksi;
 
-
-
     for(i = 0; i < Nx; i++)
     {
         if(i == 0)
-        {
             dUarr[0] = (Uarr[1]-Uarr[0])/hx;
-        }
         else if(i==Nx-1)
-        {
             dUarr[Nx-1] = (Uarr[Nx-1]-Uarr[Nx-2])/hx;
-        }
         else
-        {
             dUarr[i] = (Uarr[i-1]+Uarr[i+1]-2.*Uarr[i])/hx;
-        }
     }
 
 
     FILE *op;
     int ts;
-    if(a>0.)
+    if(a > 0.)
     {
         for( t = 0.; t < Tmax; t+=dt )
         {
@@ -57,7 +46,6 @@ void CIP()
                 UarrN[i]  = ((A*ksi + B)*ksi+C)*ksi+D;
                 dUarrN[i] = ((3.*A*ksi + 2.*B)*ksi+C);
             }
-
             UarrN[0] = UarrN[Nx-1];
             dUarrN[0] = dUarrN[Nx-1];
             for (i = 0; i < Nx; i++)
@@ -68,11 +56,11 @@ void CIP()
             ts++;
         }
     }
-    
-    
-    if(a<0.)
+
+
+    if(a < 0.)
     {
-        for( t = 0.; t < Tmax; t+=dt )
+        for(t = 0.; t < Tmax; t+=dt)
         {
             for (i = 0; i < Nx-1; i++)
             {
@@ -85,8 +73,6 @@ void CIP()
 
                 UarrN[i]  = ((A*ksi + B)*ksi+C)*ksi+D;
                 dUarrN[i] = ((3.*A*ksi + 2.*B)*ksi+C);
-
-                //UarrN[i] = Uarr[i] - CFL*(Uarr[i] - Uarr[i-1]);
             }
 
             UarrN[Nx-1] = UarrN[0];
@@ -95,7 +81,6 @@ void CIP()
             {
                 Uarr[i]  = UarrN[i];
                 dUarr[i] = dUarrN[i];
-                //fprintf (op, "%f %f %f\n", (double)i*hx + xL, t, Uarr[i]);
             }
             ts++;
         }
@@ -104,9 +89,7 @@ void CIP()
 
     op = fopen("output.CIP","w");
     for (i = 0; i < Nx; i++)
-    {
         fprintf (op, "%f %f\n", (double)i*hx + xL, Uarr[i]);
-    }
     fclose(op);
 }
 
@@ -124,72 +107,62 @@ void upwind()
     op = fopen("output.upwind", "w");
     if(a<0.)
     {
-        for(t=0.; t<Tmax; t+=dt)
+        for(t = 0.; t < Tmax; t += dt)
         {
             for(i = 0; i < Nx-1; i++)
-            {
                 UarrN[i] = Uarr[i] + CFL*(Uarr[i+1] - Uarr[i]);
-            }
 
             UarrN[Nx-1] = UarrN[0];
 
             for(i = 0; i < Nx; i++)
-            {
                 Uarr[i] = UarrN[i];
-            }
             nt++;
         }
     }
-    if(a>0)
+    if(a > 0.)
     {
-        for(t=0.; t<Tmax; t+=dt)
+        for(t = 0.; t<Tmax; t+=dt)
         {
             for(i = 1; i < Nx; i++)
-            {
                 UarrN[i] = Uarr[i] - CFL*(Uarr[i] - Uarr[i-1]);
-            }
 
             UarrN[0] = UarrN[Nx-1];
 
             for(i = 0; i < Nx; i++)
-            {
                 Uarr[i] = UarrN[i];
-            }
             nt++;
         }
     }
 
     for(i = 0; i < Nx; i++)
-    {
         fprintf(op,"%f %f\n",(double)i*hx,Uarr[i]);
-    }
     fclose(op);
     printf("%d\n", nt);
 
 }
 
+
 void init_cond()
 {
-	double x;
-	int i;
-	hx = (xR-xL)/(Nx-1);
-	for( i = 0; i < Nx; i++)
+    double x;
+    int i;
+    hx = (xR-xL)/(Nx-1);
+    for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
         if(x> 0.1 && x<0.3)
             Uarr[i] = 1.;
         else
             Uarr[i] = 0.;
-    }	
+    }
 }
 
 int main()
 {
-
     init_cond();
     CIP();
     init_cond();
     upwind();
-    
-	return 0;
+
+    return 0;
 }
