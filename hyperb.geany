@@ -15,10 +15,23 @@ indent_mode=2
 [project]
 name=hyperb
 base_path=/home/prof/Documents/git-proj/Hyperb/src
+description=
 
 [long line marker]
 long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=-1
+current_page=4
+FILE_NAME_0=121;C;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Fmain_2.c;0;4
+FILE_NAME_1=58;C;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Fmain.c;0;4
+FILE_NAME_2=139;C;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Fmain_LF.c;0;4
+FILE_NAME_3=0;None;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Foutput.upwind;0;4
+
+[editor]
+line_wrapping=false
+line_break_column=90
+auto_continue_multiline=true
+
+[VTE]
+last_dir=/home/vbondarenko/projects/Hyperb/src
