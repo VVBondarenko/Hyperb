@@ -14,7 +14,7 @@ indent_mode=2
 
 [project]
 name=hyperb
-base_path=/home/ole/Hyperb/src
+base_path=/home/vbondarenko/projects/Hyperb/src
 description=
 file_patterns=
 
@@ -24,7 +24,7 @@ long_line_column=72
 
 [files]
 current_page=0
-FILE_NAME_0=1616;C;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Fmain_LF.c;0;4
+FILE_NAME_0=1454;C;0;EUTF-8;1;1;0;%2Fhome%2Fvbondarenko%2Fprojects%2FHyperb%2Fsrc%2Fmain_LF.c;0;4
 
 [editor]
 line_wrapping=false
@@ -39,6 +39,9 @@ CFT_00_LB=_Compile
 CFT_00_CM=gcc -Wall -c "%f" -lm
 CFT_00_WD=
 CFT_01_LB=_Build
-CFT_01_CM=gcc -Wall -o "%e" "%f" -lm
+CFT_01_CM=gcc -Wall -o "../bin/%e" "%f" -lm
 CFT_01_WD=
 filetypes=C;
+EX_00_LB=_Execute
+EX_00_CM="../bin/%e"
+EX_00_WD=
