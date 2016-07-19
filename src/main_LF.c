@@ -3,34 +3,65 @@
 #include <math.h>
 
 double xL = 0., xR = 1., hx, t, Tmax=0.3, CFL = 0.9, dt, a = 1.;
-#define Nx 512
+#define Nx 1024
 
 double 	Uarr[Nx];
+double 	Uexact[Nx];
 
 double f(double u)
 {
 	return 0.5*u*u;
 }
 
-void lax_friedrich()
+void exact_solution(double lL, double lR, double tval)
+{
+    double x;
+    double L;
+    int i;
+    
+    L = lR - lL;
+       
+		
+    for( i = 0; i < Nx; i++)
+    {
+        x = (double)i*hx + xL;
+        if(x>=lL && x<=lL+tval && 0.<tval && tval<=2.*L)        
+            Uexact[i] 	= (x - lL) / tval;
+        else if(x>=lL+tval && x<=lR+0.5*tval && 0.<tval && tval<=2.*L)
+            Uexact[i] 	= 1.;
+	    else if(x>=lL && x<=lL+sqrt(2.*L*tval) && tval>2.*L)
+			Uexact[i]		= (x - lL) / tval;
+		else
+			Uexact[i] 	= 0.;
+			
+    }
+}
+
+void lax_friedrichs()
 {
     //Nx = pow(2, 6);
     hx = (xR - xL)/(Nx+1);
     dt = CFL*hx/fabs(a);
+    
+    
 
     double UarrN[Nx], t = 0.;
     int i, nt=0;
 
 
     FILE *op;
-    op = fopen("output.upwind", "w");
+    op = fopen("dat/burgers/output_LF", "w");
 
     for(t = 0.; t<Tmax; t+=dt)
     {
-        for(i = 0; i < Nx; i++)
+        for(i = 1; i < Nx-1; i++)
             UarrN[i] = 0.5*((Uarr[i+1]+Uarr[i-1])-dt/hx*(f(Uarr[i+1])-f(Uarr[i-1])));
 
-        //UarrN[0] = UarrN[Nx-1];
+		// BC
+		//UarrN[0] 	= Uarr[0];
+        UarrN[Nx-1] 	= 0.;
+        
+        // Ouput
         for(i = 0; i < Nx; i++)
         {
             Uarr[i] = UarrN[i];
@@ -39,12 +70,18 @@ void lax_friedrich()
         }
         nt++;
     }
+    
+    fclose(op); // Close output in first dat file
     //}
-
-    //for(i = 0; i < Nx; i++)
-    //fprintf(op,"%f %f\n",(double)i*hx,Uarr[i]);
-    //fclose(op);
-    printf("%d\n", nt);
+    
+    op = fopen("dat/burgers/output_LF_last", "w");
+	exact_solution(0.3,0.5,Tmax);
+    for(i = 0; i < Nx; i++)
+        fprintf(op,"%f %f %f\n", (double)i*hx, Uarr[i], 
+			Uexact[i]);        
+    fclose(op);    
+    
+    printf("%d %f %f\n", nt, dt, Uarr[Nx-1]);
 
 }
 
@@ -56,17 +93,18 @@ void init_cond()
     for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
-        if(x> 0.3 && x<0.5)
+        if(x>= 0.3 && x<=0.5)
             Uarr[i] = 1.;
         else
             Uarr[i] = 0.;
     }
 }
 
+
 int main()
 {
     init_cond();
-    lax_friedrich();
+    lax_friedrichs();
 
     return 0;
 }

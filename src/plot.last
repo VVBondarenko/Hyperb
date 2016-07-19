@@ -1,5 +1,0 @@
-#!/usr/bin/gnuplot -persist
-
-
-set xrange [0:1]
-plot "output.upwind"  with line, "output.CIP" with line

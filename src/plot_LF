@@ -2,4 +2,4 @@
 
 
 #set xrange [0:1]
-splot "output.upwind"  with line
+splot "dat/burgers/output_LF"  with line
