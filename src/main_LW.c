@@ -13,10 +13,6 @@ double f(double u)
 	return 0.5*u*u;
 }
 
-double df_du(double u)
-{
-	return u;
-}
 
 void exact_solution(double lL, double lR, double tval)
 {
