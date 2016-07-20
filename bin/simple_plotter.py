@@ -8,7 +8,7 @@ import numpy as np
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-data = np.genfromtxt('../dat/burgers/output_LW')
+data = np.genfromtxt('../dat/burgers/output_Roe')
 x = data[:,0]
 y = data[:,1]
 z = data[:,2]
