@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-double xL = 0., xR = 1., hx, t, Tmax=0.2, CFL = 0.9, dt, a = 1.;
-#define Nx 128
+double xL = 0., xR = 1., hx, t, Tmax=0.1, CFL = 0.9, dt, a = 1.;
+#define Nx 256
 
 double 	Uarr[Nx];
 double 	Uexact[Nx];
@@ -26,9 +26,9 @@ void roe()
     hx = (xR - xL)/(Nx+1);
     dt = CFL*hx/fabs(a);
 
-    double UarrN[Nx], t = 0.;
+    double UarrN[Nx], t = 0., fp, fm;
     int i, nt=0;
-	double Fplus, Fminus;
+
 
     FILE *op;
     op = fopen("../dat/burgers/output_Roe", "w");
@@ -37,33 +37,37 @@ void roe()
     {
         for(i = 2; i < Nx-2; i++)
         {
-
 			a = df_du((Uarr[i]+Uarr[i-1])*0.5);
             if(a<0.)
             {
 				//a = df_du((Uarr[i+1]+Uarr[i])*0.5);
-				Fplus = f(Uarr[i+1]);
-				Fminus = f(Uarr[i]);				
-                //UarrN[i] = Uarr[i] + a*dt/hx*(Uarr[i+1] - Uarr[i]);
+				fp = f(Uarr[i+1]);
+				fm = f(Uarr[i]);
+                //UarrN[i] = Uarr[i] - dt/hx*(fp - fm);
 			}
             else
             {
-                //UarrN[i] = Uarr[i] - a*dt/hx*(Uarr[i] - Uarr[i-1]);
-				Fplus = f(Uarr[i]);
-				Fminus = f(Uarr[i-1]);	
+				fp = f(Uarr[i]);
+				fm = f(Uarr[i-1]);                
 			}
-			UarrN[i] = Uarr[i] - dt/hx*(Fplus-Fminus);
+			UarrN[i] = Uarr[i] - dt/hx*(fp - fm);
         }
 		//UarrN[Nx-1] 	= 0.;
 		//UarrN[Nx-2] 	= 0.;
 		//UarrN[Nx-3] 	= 0.;
 		//UarrN[Nx-4] 	= 0.;
+		
+		/* BC */
+		UarrN[0] = Uexact[0];
+		
+		/* Update */
         for(i = 0; i < Nx; i++)
         {
-			//if(UarrN[i]==UarrN[i])
+			/*if(UarrN[i]==UarrN[i])
 				Uarr[i] = UarrN[i];
-			//else 
-				//Uarr[i] = 0.;
+			else 
+				Uarr[i] = 0.;*/
+			Uarr[i] = UarrN[i];
             
             fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
         }
