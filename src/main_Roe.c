@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-double xL = 0., xR = 1., hx, t, Tmax=0.2, CFL = 0.9, dt, a = 1.;
+double xL = 0., xR = 1., hx, t, Tmax=0.01, CFL = 0.9, dt, a = 1.;
 #define Nx 256
 
 double 	Uarr[Nx];
@@ -46,10 +46,10 @@ void roe()
             if(a>0.)
                 UarrN[i] = Uarr[i] - a*dt/hx*(Uarr[i] - Uarr[i-1]);
         }
-		UarrN[Nx-1] 	= 0.;
-		UarrN[Nx-2] 	= 0.;
-		UarrN[Nx-3] 	= 0.;
-		UarrN[Nx-4] 	= 0.;
+		//UarrN[Nx-1] 	= 0.;
+		//UarrN[Nx-2] 	= 0.;
+		//UarrN[Nx-3] 	= 0.;
+		//UarrN[Nx-4] 	= 0.;
         for(i = 0; i < Nx; i++)
         {
 			if(UarrN[i]==UarrN[i])
@@ -77,7 +77,7 @@ void roe()
 int main()
 {
 	int ret_codes = 0;
-	init_task(3);
+	init_task(2);
     init_cond(0.3,0.5);
     roe();
 	ret_codes = system("../bin/plot_Roe");

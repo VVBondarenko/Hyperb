@@ -64,7 +64,7 @@ void es2(double lL, double lR, double tval)
     for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
-        if ((x>=lL && x<=lL+sqrt(L*(L+2.*tval)*0.5)) ||
+        if ((x>=lL && x<=lL+sqrt(L*(L+2.*tval)*0.5) && tval >L*0.5) ||
                 (x>=lL && x<=(lL+lR)*0.5+tval && tval>=0 && tval<=L*0.5))
         {
             Uexact[i] = 2.*(x-lL)/(L+2.*tval);
@@ -159,7 +159,7 @@ void init_task(int id)
 {
     exact_solution	= &es1;			//rectangle
     init_cond		= &ic1;
-    if (id == 2)			//contains mistake somewhere, check logic expressions
+    if (id == 2)
     {
         exact_solution	= &es2;		//triangle
         init_cond		= &ic2;
