@@ -1,5 +1,0 @@
-#!/usr/bin/gnuplot -persist
-
-
-set xrange [0:1]
-plot "dat/burgers/output_LF_last"  with line
