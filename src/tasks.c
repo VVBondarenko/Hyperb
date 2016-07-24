@@ -99,20 +99,20 @@ void ic3(double lL, double lR)
 }
 void es3(double lL, double lR, double tval)
 {
-	double x;
+    double x;
     int i;
 
     for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
-		if (x<=lL+tval*0.5)
-		{
-			Uexact[i] = 1.;
-		}
-		else
-		{
-			Uexact[i] = 0.;
-		}
+        if (x<=lL+tval*0.5)
+        {
+            Uexact[i] = 1.;
+        }
+        else
+        {
+            Uexact[i] = 0.;
+        }
     }
 }
 
@@ -132,25 +132,25 @@ void ic4(double lL, double lR)
 }
 void es4(double lL, double lR, double tval)
 {
-	double x;
+    double x;
     int i;
 
     for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
-		if (x<=lL)
-		{
-			Uexact[i] = 0.;
-		}
-		else if (x>lL && x<=(lL+tval))
-		{
-			Uexact[i] = (x-lL)/tval;
-		}
-		else
-		{
-			Uexact[i] = 1.;
-		}
-		
+        if (x<=lL)
+        {
+            Uexact[i] = 0.;
+        }
+        else if (x>lL && x<=(lL+tval))
+        {
+            Uexact[i] = (x-lL)/tval;
+        }
+        else
+        {
+            Uexact[i] = 1.;
+        }
+
     }
 }
 
@@ -165,16 +165,16 @@ void init_task(int id)
         init_cond		= &ic2;
     }
     if (id == 3)
-	{
-		exact_solution	= &es3;
-		init_cond		= &ic3;
-	}
-	if (id == 4)
-	{
-		exact_solution	= &es4;
-		init_cond		= &ic4;
-	}
-	
-	
-	
+    {
+        exact_solution	= &es3;
+        init_cond		= &ic3;
+    }
+    if (id == 4)
+    {
+        exact_solution	= &es4;
+        init_cond		= &ic4;
+    }
+
+
+
 }
