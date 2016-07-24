@@ -47,7 +47,10 @@ void lax_wendroff() //used Richtmyer method
     double UarrN[Nx], Um, Up, t = 0.;
     int i, nt=0;
 
-
+    for(i = 0; i < Nx; i++)
+    {
+        UarrN[i] = Uarr[i];
+    }
     FILE *op;
     op = fopen("../dat/burgers/output_LW", "w");
 
@@ -62,7 +65,7 @@ void lax_wendroff() //used Richtmyer method
 			
 		// BC
 		//UarrN[0] 	= Uarr[0];
-        UarrN[Nx-1] 	= 0.;
+        //UarrN[Nx-1] 	= 0.;
         
         // Ouput
         for(i = 0; i < Nx; i++)

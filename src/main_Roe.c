@@ -256,6 +256,5 @@ int main()
     ret_codes = system("../bin/plot_llf");
     ret_codes = system("../bin/plot_llf_last");
 
-
     return ret_codes;
 }

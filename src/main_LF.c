@@ -3,7 +3,7 @@
 #include <math.h>
 
 double xL = 0., xR = 1., hx, t, Tmax=0.3, CFL = 0.9, dt, a = 1.;
-#define Nx 32
+#define Nx 64
 
 double 	Uarr[Nx];
 double 	Uexact[Nx];
@@ -46,7 +46,10 @@ void lax_friedrichs()
     double UarrN[Nx], t = 0.;
     int i, nt=0;
 
-
+    for(i = 0; i < Nx; i++)
+    {
+        UarrN[i] = Uarr[i];
+    }
     FILE *op;
     op = fopen("../dat/burgers/output_LF", "w");
 
@@ -57,7 +60,7 @@ void lax_friedrichs()
 
 		// BC
 		//UarrN[0] 	= Uarr[0];
-        UarrN[Nx-1] 	= 0.;
+        //UarrN[Nx-1] 	= 0.;
         
         // Ouput
         for(i = 0; i < Nx; i++)
