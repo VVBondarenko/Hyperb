@@ -3,7 +3,7 @@
 #include <math.h>
 
 double xL = 0., xR = 1., hx, t, Tmax=0.3, CFL = 0.9, dt, a = 1.;
-#define Nx 64
+#define Nx 256
 
 double 	Uarr[Nx];
 double 	Uexact[Nx];
@@ -80,6 +80,50 @@ void lax_friedrichs()
     printf("%d %f %f\n", nt, dt, Uarr[Nx-1]);
 
 }
+void lax_friedrichs_ch()
+{
+    //Nx = pow(2, 6);
+    hx = (xR - xL)/(Nx+1);
+    dt = CFL*hx/fabs(a);
+
+
+    double UarrN[Nx], t = 0.;
+    int i, nt=0;
+
+    for(i = 0; i < Nx; i++)
+    {
+        UarrN[i] = Uarr[i];
+    }
+    FILE *op;
+    op = fopen("../dat/burgers/output_LF", "w");
+
+    for(t = 0.; t<Tmax; t+=dt)
+    {
+        for(i = 1; i < Nx-1; i+=2)
+            UarrN[i+nt%2] = 0.5*((Uarr[i+nt%2+1]+Uarr[i+nt%2-1])-dt/hx*(f(Uarr[i+nt%2+1])-f(Uarr[i+nt%2-1])));
+
+        // Ouput
+        for(i = 0; i < Nx; i++)
+        {
+            Uarr[i] = UarrN[i];
+            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+
+        }
+        nt++;
+    }
+
+    fclose(op); // Close output in first dat file
+
+    op = fopen("../dat/burgers/output_LF_last", "w");
+    exact_solution(0.3,0.5,Tmax);
+    for(i = 0; i < Nx; i++)
+        fprintf(op,"%f %f %f\n", (double)i*hx, Uarr[i],
+                Uexact[i]);
+    fclose(op);
+
+    printf("%d %f %f\n", nt, dt, Uarr[Nx-1]);
+
+}
 
 void init_cond()
 {
@@ -101,7 +145,7 @@ int main()
 {
     int ret_codes = 0;
     init_cond();
-    lax_friedrichs();
+    lax_friedrichs_ch();
     ret_codes = system("../bin/plot_LF");
     ret_codes = system("../bin/plot_LF_last");
 

@@ -154,6 +154,40 @@ void es4(double lL, double lR, double tval)
     }
 }
 
+void ic5(double lL, double lR)
+{
+    double x;
+    int i;
+    hx = (xR-xL)/(Nx-1);
+    for( i = 0; i < Nx; i++)
+    {
+        x = (double)i*hx + xL;
+        Uarr[i] = sin(2.*M_PI*x);
+    }
+}
+void es5(double lL, double lR, double tval)
+{
+    //double x;
+    int i;
+
+    for( i = 0; i < Nx; i++)
+    {
+        //x = (double)i*hx + xL;
+        //if (x<=lL)
+        //{
+            //Uexact[i] = 0.;
+        //}
+        //else if (x>lL && x<=(lL+tval))
+        //{
+            //Uexact[i] = (x-lL)/tval;
+        //}
+        //else
+        //{
+            //Uexact[i] = 1.;
+        //}
+		Uexact[i] = 0.;
+    }
+}
 
 void init_task(int id)
 {
@@ -174,7 +208,11 @@ void init_task(int id)
         exact_solution	= &es4;
         init_cond		= &ic4;
     }
-
+	if(id == 5)
+	{
+        exact_solution	= &es5;
+        init_cond		= &ic5;
+	}
 
 
 }

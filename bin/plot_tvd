@@ -1,0 +1,5 @@
+#!/usr/bin/gnuplot -persist
+
+
+#set xrange [0:1]
+splot "../dat/burgers/output_tvd"  with line
