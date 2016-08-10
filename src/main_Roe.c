@@ -4,9 +4,9 @@
 #include "smplDynArray.c"
 
 
-double xL = 0., xR = 1., hx, t, Tmax=0.08, CFL = 0.9, dt, a = 1.;
+double xL = 0., xR = 1., hx, t, Tmax=0.001, CFL = 0.9, dt, a = 1.;
 int Nx = 512;
-
+void (*solve)();
 //double 	Uarr[Nx];
 //double 	dUarr[Nx];
 //double 	Uexact[Nx];
@@ -63,7 +63,7 @@ double errC()
 {
     int i;
     double temp = 0.;
-    for (i = 0; i < Nx; i++)
+    for (i = 2; i < Nx-2; i++)
     {
         temp = fmax(temp, fabs(Uarr[i]-Uexact[i]));
     }
@@ -73,17 +73,30 @@ double errL1()
 {
     int i;
     double temp = 0.;
-    for (i = 0; i < Nx; i++)
+    for (i = 2; i < Nx-2; i++)
     {
         temp += fabs(Uarr[i]-Uexact[i]);
     }
     return temp*hx;
 }
-double errL2()
+void metr_uref_l1()
 {
     int i;
     double temp = 0.;
     for (i = 0; i < Nx; i++)
+    {
+        temp += fabs(Uexact[i]);
+    }
+    FILE* urefs_out;
+    urefs_out = fopen("../uref.dat", "w");
+    fprintf(urefs_out,"%3.3f",temp);
+    fclose(urefs_out);
+}
+double errL2()
+{
+    int i;
+    double temp = 0.;
+    for (i = 2; i < Nx-2; i++)
     {
         temp += fabs(Uarr[i]-Uexact[i])*fabs(Uarr[i]-Uexact[i]);
     }
@@ -133,7 +146,7 @@ void roe()
         for(i = 0; i < Nx; i++)
         {
             Uarr[i] = UarrN[i];
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -142,10 +155,10 @@ void roe()
     op = fopen("../dat/burgers/output_Roe_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
-
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
+	//printf("%d", nt);
 }
 void rusanov()
 {
@@ -180,7 +193,7 @@ void rusanov()
         for(i = 0; i < Nx; i++)
         {
             Uarr[i] = UarrN[i];
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -189,9 +202,9 @@ void rusanov()
     op = fopen("../dat/burgers/output_Rusanov_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 void llf()
@@ -229,7 +242,7 @@ void llf()
         {
             Uarr[i] = UarrN[i];
 
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -238,9 +251,9 @@ void llf()
     op = fopen("../dat/burgers/output_llf_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 void llf_ch()
@@ -278,7 +291,7 @@ void llf_ch()
         {
             Uarr[i] = UarrN[i];
 
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -287,9 +300,9 @@ void llf_ch()
     op = fopen("../dat/burgers/output_llf_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 
@@ -325,7 +338,7 @@ void EO()
         {
             Uarr[i] = UarrN[i];
 
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -334,9 +347,9 @@ void EO()
     op = fopen("../dat/burgers/output_EO_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 void tvd()
@@ -372,7 +385,7 @@ void tvd()
         {
             Uarr[i] = UarrN[i];
 
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -381,9 +394,9 @@ void tvd()
     op = fopen("../dat/burgers/output_tvd_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 
@@ -431,7 +444,7 @@ void bgp()
         {
             Uarr[i] = UarrN[i];
             dUarr[i]= dUarrN[i];
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -440,9 +453,9 @@ void bgp()
     op = fopen("../dat/burgers/output_bgp_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 void bgp_ch()
@@ -485,7 +498,7 @@ void bgp_ch()
         {
             Uarr[i] = UarrN[i];
             dUarr[i]= dUarrN[i];
-            fprintf(op,"%f %f %f\n",(double)i*hx, t, Uarr[i]);
+            fprintf(op,"%3.3f %3.3f %3.3f\n",(double)i*hx, t, Uarr[i]);
         }
         nt++;
     }
@@ -494,9 +507,9 @@ void bgp_ch()
     op = fopen("../dat/burgers/output_bgp_last", "w");
     exact_solution(0.3,0.5,Tmax);
     for(i = 0; i < Nx; i++)
-        fprintf(op,"%f %f %f %f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
+        fprintf(op,"%3.3f %3.3f %3.3f %3.3f\n", (double)i*hx, Uarr[i], Uexact[i], fabs(Uarr[i]-Uexact[i]));
     fclose(op);
-    printf("%d %f %f %f\n", Nx, errC(), errL1(),errL2());
+    printf("%d %3.3f %3.3f %3.3f\n", Nx, errC(), errL1(),errL2());
 
 }
 
@@ -504,22 +517,37 @@ void bgp_ch()
 
 int main(int argc, char** argv)
 {
-    int ret_codes = 0;
+    int ret_codes = 0, methodN = 1;
     Nx = atoi(argv[2]);
-
+    CFL = atof(argv[4]);
+	methodN = atoi(argv[3]);
+	if(methodN == 1)
+		solve = &roe;
+	if(methodN == 2)
+		solve = &rusanov;
+	if(methodN == 3)
+		solve = &llf;
+	if(methodN == 4)
+		solve = &EO;
+	if(methodN == 5)
+		solve = &tvd;
+	if(methodN == 6)
+		solve = &bgp;
+	if(methodN == 7)
+		solve = &bgp_ch;
+			
     /*	Initing arrays	*/
     init1DArr(&Uarr,Nx);
     init1DArr(&dUarr,Nx);
     init1DArr(&Uexact,Nx);
-
-
+	
     init_task(atoi(argv[1]));
     init_cond(0.3,0.5);
-    bgp_ch();
-
+	solve();
+	metr_uref_l1();
     //ret_codes = system("../bin/plotter.py ../dat/burgers/output_llf&");
     //ret_codes = system("../bin/plot_bgp");
-    //ret_codes = system("../bin/plot_llf_last");
+    //ret_codes = system("../bin/plot_Roe_last");
 
     /*	Cleaning arrays	*/
     free1DArr(&Uarr);
