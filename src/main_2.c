@@ -2,10 +2,129 @@
 #include <stdlib.h>
 #include <math.h>
 
-double xL = 0., xR = 1., hx, t, Tmax=0.195, CFL = 0.9, dt, a = 1.;
-#define Nx 64
+double xL = 0., xR = 1., hx, t, Tmax=6, CFL = 0.515, dt, a = -1.;
+#define Nx 256
 
-double 	Uarr[Nx];
+double 	Uarr[Nx],
+        dUarr[Nx];
+
+double f_B_3(double X)
+{
+    double absV=fabs(X);
+    if(absV<2)
+    {
+        if(absV>=1)
+        {
+            return 0.25*(2.0-absV)*(2.0-absV)*(2.0-absV);
+        }
+        else
+            return 1.0 - 1.5*absV*absV*(1.0 - 0.5*absV);
+    }
+    return 0.0;
+}
+
+double f_d_B_3(double X)
+{
+    double absV=fabs(X);
+    if(X>=0)
+    {
+        if(absV<2)
+        {
+            if(absV>=1)
+                return -0.75*(2.0-absV)*(2.0-absV);
+            else
+                return -1.5*(2.0*absV - 1.5*absV*absV);
+        }
+    }
+    else
+    {
+        if(absV<2)
+        {
+            if(absV>=1)
+                return 0.75*(2.0-absV)*(2.0-absV);
+            else
+                return 1.5*(2.0*absV - 1.5*absV*absV);
+        }
+    }
+    return 0.0;
+}
+
+
+void IDO()
+{
+    dt = CFL*hx/fabs(a);
+
+    int i;
+    double	UarrN[Nx],
+//            dUarr[Nx],
+            dUarrN[Nx];
+
+    double A, B, C, D;
+
+    for(i = 0; i < Nx; i++)
+    {
+        if(i == 0)
+            dUarr[0] = (Uarr[1]-Uarr[0])/hx;
+        else if(i==Nx-1)
+            dUarr[Nx-1] = (Uarr[Nx-1]-Uarr[Nx-2])/hx;
+        else
+            dUarr[i] = (Uarr[i-1]+Uarr[i+1]-2.*Uarr[i])/hx;
+    }
+
+
+    FILE *op;
+    int ts;
+
+    for( t = 0.; t < Tmax; t+=dt )
+    {
+        for (i = 1; i < Nx-1; i++)
+        {
+            A = (-0.75/hx*(Uarr[i+1]-Uarr[i-1])+0.25*(dUarr[i+1]+4*dUarr[i]+dUarr[i-1]))/hx/hx/hx/hx;
+            B = (-0.5/hx*(Uarr[i+1]-2*Uarr[i]+Uarr[i-1]) +0.25*(dUarr[i+1]-dUarr[i-1]))/hx/hx/hx;
+            C = (1.25/hx*(Uarr[i+1]-Uarr[i-1])-0.25*(dUarr[i+1]+8*dUarr[i]+dUarr[i-1]))/hx/hx;
+            D = (1./hx*(Uarr[i+1] -2.*Uarr[i]+Uarr[i-1]) -0.25*(dUarr[i+1]-dUarr[i-1]))/hx;
+
+            //ToDo: add possibility to change a to values, that are different from 1
+            dUarrN[i] = dUarr[i]+ 2.*dt*D + 3.*dt*dt*C + 4.*B*dt*dt*dt;
+            UarrN[i]  = Uarr[i] + dt*dUarr[i]+dt*dt*D+dt*dt*dt*C+dt*dt*dt*dt*B;
+        }
+        //так как рассматриваем случай a<0, то будем считать, что у нас всё движется налево,
+        // а значит и нужна периодчиность только с лева. Просчитаем дополнительно окрестность
+        // точки i=0
+        i = 0;
+        A = (-0.75/hx*(Uarr[i+1]-Uarr[Nx-1])+0.25*(dUarr[i+1]+4*dUarr[i]+dUarr[Nx-1]))/hx/hx/hx/hx;
+        B = (-0.5/hx*(Uarr[i+1]-2*Uarr[i]+Uarr[Nx-1]) +0.25*(dUarr[i+1]-dUarr[Nx-1]))/hx/hx/hx;
+        C = (1.25/hx*(Uarr[i+1]-Uarr[Nx-1])-0.25*(dUarr[i+1]+8*dUarr[i]+dUarr[Nx-1]))/hx/hx;
+        D = (1./hx*(Uarr[i+1] -2.*Uarr[i]+Uarr[Nx-1]) -0.25*(dUarr[i+1]-dUarr[Nx-1]))/hx;
+        dUarrN[i] = dUarr[i]+ 2.*dt*D + 3.*dt*dt*C + 4.*B*dt*dt*dt;
+        UarrN[i]  = Uarr[i] + dt*dUarr[i]+dt*dt*D+dt*dt*dt*C+dt*dt*dt*dt*B;
+
+        i = Nx-1;
+        A = (-0.75/hx*(Uarr[0]-Uarr[i-1])+0.25*(dUarr[0]+4*dUarr[i]+dUarr[i-1]))/hx/hx/hx/hx;
+        B = (-0.5/hx*(Uarr[0]-2*Uarr[i]+Uarr[i-1]) +0.25*(dUarr[0]-dUarr[i-1]))/hx/hx/hx;
+        C = (1.25/hx*(Uarr[0]-Uarr[i-1])-0.25*(dUarr[i+1]+8*dUarr[i]+dUarr[i-1]))/hx/hx;
+        D = (1./hx*(Uarr[0] -2.*Uarr[i]+Uarr[i-1]) -0.25*(dUarr[0]-dUarr[i-1]))/hx;
+        dUarrN[i] = dUarr[i]+ 2.*dt*D + 3.*dt*dt*C + 4.*B*dt*dt*dt;
+        UarrN[i]  = Uarr[i] + dt*dUarr[i]+dt*dt*D+dt*dt*dt*C+dt*dt*dt*dt*B;
+
+
+        UarrN[Nx-1] = UarrN[0];
+        dUarrN[Nx-1] = dUarrN[0];
+        for (i = 0; i < Nx; i++)
+        {
+            Uarr[i]  = UarrN[i];
+            dUarr[i] = dUarrN[i];
+        }
+        ts++;
+    }
+
+    printf("%d\n",ts);
+
+    op = fopen("output.IDO","w");
+    for (i = 0; i < Nx; i++)
+        fprintf (op, "%f %f\n", (double)i*hx + xL, Uarr[i]);
+    fclose(op);
+}
 
 void CIP()
 {
@@ -13,7 +132,8 @@ void CIP()
 
     int i;
     double	UarrN[Nx],
-            dUarr[Nx], dUarrN[Nx];
+//            dUarr[Nx],
+            dUarrN[Nx];
 
     double A, B, C, D, ksi;
 
@@ -150,18 +270,28 @@ void init_cond()
     for( i = 0; i < Nx; i++)
     {
         x = (double)i*hx + xL;
-        if(x> 0.1 && x<0.3)
+        if(x> 0.7 && x<0.8)
+        {
+//            Uarr[i] = f_B_3((x-0.75)/0.1*2.);
             Uarr[i] = 1.;
+//            dUarr[i]= f_d_B_3((x-0.75)/0.1*2.);
+        }
         else
+        {
             Uarr[i] = 0.;
+//            dUarr[i] = 0.;
+        }
     }
 }
 
 int main()
 {
     init_cond();
+    IDO();
+    init_cond();
     CIP();
     init_cond();
+//    CIP();
     upwind();
 
     return 0;
